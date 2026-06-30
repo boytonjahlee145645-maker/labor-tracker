@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import { useAuth } from '@/lib/auth-context'
 
 const tabs = [
   {
@@ -54,6 +55,13 @@ const tabs = [
 
 export default function BottomNav() {
   const pathname = usePathname()
+  const router = useRouter()
+  const { signOut } = useAuth()
+
+  async function handleLogout() {
+    await signOut()
+    router.replace('/login')
+  }
 
   return (
     <nav
@@ -68,15 +76,15 @@ export default function BottomNav() {
     >
       <div className="flex items-center justify-around pt-2 pb-1 px-2">
         {tabs.map((tab) => {
-          const isActive = pathname === tab.href
+          const isActive = pathname === tab.href || (tab.href !== '/' && pathname.startsWith(tab.href))
           return (
             <Link
               key={tab.href}
               href={tab.href}
-              className="flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-all duration-200 touch-target"
+              className="flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all duration-200 touch-target"
               style={{
                 color: isActive ? '#a78bfa' : '#606080',
-                minWidth: '64px',
+                minWidth: '52px',
               }}
             >
               <div
@@ -106,7 +114,24 @@ export default function BottomNav() {
             </Link>
           )
         })}
+
+        {/* Logout button */}
+        <button
+          onClick={handleLogout}
+          className="flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all duration-200 touch-target"
+          style={{ color: '#ef4444', minWidth: '52px', background: 'none', border: 'none', cursor: 'pointer' }}
+        >
+          <div style={{ transform: 'scale(1)', transition: 'transform 0.2s ease' }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <polyline points="16 17 21 12 16 7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+          </div>
+          <span style={{ fontSize: '10px', fontWeight: 400, letterSpacing: '0.02em' }}>خروج</span>
+        </button>
       </div>
     </nav>
   )
 }
+
